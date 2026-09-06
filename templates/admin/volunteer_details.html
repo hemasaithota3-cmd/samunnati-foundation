@@ -1,0 +1,31 @@
+{% extends "admin/base.html" %}
+{% from "admin/_detail_actions.html" import actions_panel %}
+{% block title %}{{ item.reference_number }} | Samunnathi Admin{% endblock %}
+{% block page_title %}Volunteer Application{% endblock %}
+
+{% block content %}
+<div class="detail-grid">
+  <div class="panel">
+    <div class="panel__head">
+      <h2>{{ item.reference_number }}</h2>
+      <span class="status-badge status-{{ item.status }}">{{ item.status }}</span>
+    </div>
+    <dl class="kv-list">
+      <dt>Name</dt><dd>{{ item.full_name }}</dd>
+      <dt>Email</dt><dd>{{ item.email }}</dd>
+      <dt>Phone</dt><dd>{{ item.phone }}</dd>
+      <dt>Location</dt><dd>{{ item.location }}</dd>
+      <dt>Education/Profession</dt><dd>{{ item.education_profession or "—" }}</dd>
+      <dt>Skills</dt><dd>{{ item.skills }}</dd>
+      <dt>Areas of Interest</dt><dd>{{ item.areas_of_interest }}</dd>
+      <dt>Availability</dt><dd>{{ item.availability }}</dd>
+      <dt>Previous Experience</dt><dd>{{ item.previous_experience or "—" }}</dd>
+      <dt>Reason</dt><dd>{{ item.reason }}</dd>
+      <dt>Message</dt><dd>{{ item.message or "—" }}</dd>
+      <dt>Submitted</dt><dd>{{ item.created_at.strftime("%d %B %Y, %H:%M") }}</dd>
+    </dl>
+  </div>
+
+  {{ actions_panel('volunteer', item, statuses) }}
+</div>
+{% endblock %}

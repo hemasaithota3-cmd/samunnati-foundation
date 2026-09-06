@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Become a Mentor | Samunnathi Foundation{% endblock %}
+{% block meta_description %}Share your knowledge and experience with students. Apply to become a Samunnathi mentor.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/forms.css') }}" />
+<style>
+  /* 1. Fully hide main navigation, desktop action buttons, AND mobile burger/toggle triggers */
+  header nav,
+  header .nav-links,
+  header .header-actions,
+  header .site-header__actions,
+  header .site-header__nav,
+  header .btn,
+  header a[href*="guidance"],
+  header a[href*="join"],
+  header .mobile-nav-toggle,
+  header .hamburger,
+  header .menu-toggle,
+  header button[aria-label*="menu" i],
+  header button[class*="toggle" i],
+  header button[class*="burger" i],
+  header button[class*="mobile" i],
+  header summary {
+    display: none !important;
+  }
+
+  /* 2. Enable absolute positioning context inside header */
+  header,
+  .site-header {
+    position: relative !important;
+  }
+
+  /* 3. Styled header Back button */
+  .header-back-btn {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #1e293b;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 9999px;
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
+    z-index: 1000;
+  }
+
+  .header-back-btn:hover {
+    background-color: #e2e8f0;
+    border-color: #94a3b8;
+    color: #0f172a;
+    transform: translateY(-50%) translateX(-2px);
+  }
+
+  .header-back-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
+  /* Mobile screen alignment adjustments */
+  @media (max-width: 640px) {
+    .header-back-btn {
+      right: 1rem;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.85rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dynamically inserted Back button placed into navbar -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const header = document.querySelector("header") || document.querySelector(".site-header");
+    if (header && !document.querySelector(".header-back-btn")) {
+      const backBtn = document.createElement("a");
+      backBtn.href = "javascript:history.back()";
+      backBtn.className = "header-back-btn";
+      backBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" />
+        </svg>
+        Back
+      `;
+      header.appendChild(backBtn);
+    }
+  });
+</script>
+
+<section class="info-hero">
+  <div class="container">
+    <p class="eyebrow">Become a Mentor</p>
+    <h1 class="info-hero__title">Become a Mentor</h1>
+    <p class="info-hero__lede">Share your knowledge, experience, and expertise with students and help them make better educational and career decisions.</p>
+    <div class="info-hero__actions">
+      <a href="#form" class="btn btn-primary">Apply as a Mentor</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="info-grid">
+      <article class="info-card" style="border-top-color: var(--primary)">
+        <h3>Why Become a Mentor?</h3>
+        <p>Your experience can shorten the distance between where a student is and where they want to be.</p>
+      </article>
+      <article class="info-card" style="border-top-color: var(--primary)">
+        <h3>How You Can Help</h3>
+        <p>Guidance calls, resume reviews, mock interviews, or simply answering the questions students can't ask elsewhere.</p>
+      </article>
+      <article class="info-card" style="border-top-color: var(--primary)">
+        <h3>Mentoring Areas</h3>
+        <p>Career direction, higher studies, specific industries, or general life-after-school decisions.</p>
+      </article>
+      <article class="info-card" style="border-top-color: var(--supporting)">
+        <h3>Who Can Become a Mentor?</h3>
+        <p>Working professionals, graduates, and specialists genuinely willing to give students their time.</p>
+      </article>
+      <article class="info-card" style="border-top-color: var(--supporting)">
+        <h3>How Mentoring Works</h3>
+        <p>Apply below, our team reviews your application, and we match you with students aligned to your expertise.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section form-section" id="form">
+  <div class="container">
+    <div class="section-head center">
+      <p class="eyebrow" style="justify-content:center">Apply as a mentor</p>
+      <h2 class="section-title">Tell us about yourself</h2>
+      <p class="section-lede" style="margin-inline:auto;text-align:center;">Fields marked <span class="required">*</span> are required.</p>
+    </div>
+
+    <div class="form-card">
+      <form method="post" action="{{ url_for('mentor.mentor_submit') }}" data-validate novalidate enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <div class="form-grid cols-2">
+          <div class="section-divider span-2">Personal Information</div>
+
+          <div class="form-group">
+            <label for="full_name">Full Name <span class="required">*</span></label>
+            <input class="form-control" type="text" id="full_name" name="full_name" required
+                   value="{{ form_data.full_name if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.full_name else 'false' }}">
+            {% if errors and errors.full_name %}<span class="field-error">{{ errors.full_name }}</span>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email <span class="required">*</span></label>
+            <input class="form-control" type="email" id="email" name="email" required
+                   value="{{ form_data.email if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.email else 'false' }}">
+            {% if errors and errors.email %}<span class="field-error">{{ errors.email }}</span>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number <span class="required">*</span></label>
+            <input class="form-control" type="tel" id="phone" name="phone" required
+                   value="{{ form_data.phone if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.phone else 'false' }}">
+            {% if errors and errors.phone %}<span class="field-error">{{ errors.phone }}</span>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="location">Location <span class="required">*</span></label>
+            <input class="form-control" type="text" id="location" name="location" required
+                   value="{{ form_data.location if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.location else 'false' }}">
+            {% if errors and errors.location %}<span class="field-error">{{ errors.location }}</span>{% endif %}
+          </div>
+
+          <div class="section-divider span-2">Professional Information</div>
+
+          <div class="form-group">
+            <label for="qualification">Qualification <span class="required">*</span></label>
+            <input class="form-control" type="text" id="qualification" name="qualification" required
+                   value="{{ form_data.qualification if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.qualification else 'false' }}">
+            {% if errors and errors.qualification %}<span class="field-error">{{ errors.qualification }}</span>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="profession">Profession <span class="required">*</span></label>
+            <input class="form-control" type="text" id="profession" name="profession" required
+                   value="{{ form_data.profession if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.profession else 'false' }}">
+            {% if errors and errors.profession %}<span class="field-error">{{ errors.profession }}</span>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="organization">Organization</label>
+            <input class="form-control" type="text" id="organization" name="organization"
+                   value="{{ form_data.organization if form_data else '' }}">
+          </div>
+
+          <div class="form-group">
+            <label for="years_experience">Years of Experience</label>
+            <input class="form-control" type="text" id="years_experience" name="years_experience"
+                   placeholder="e.g. 5 years"
+                   value="{{ form_data.years_experience if form_data else '' }}">
+          </div>
+
+          <div class="form-group span-2">
+            <label for="expertise">Areas of Expertise <span class="required">*</span></label>
+            <input class="form-control" type="text" id="expertise" name="expertise" required
+                   placeholder="e.g. Software Engineering, Product Management"
+                   value="{{ form_data.expertise if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.expertise else 'false' }}">
+            {% if errors and errors.expertise %}<span class="field-error">{{ errors.expertise }}</span>{% endif %}
+          </div>
+
+          <div class="form-group span-2">
+            <label for="mentoring_areas">Areas You Can Mentor <span class="required">*</span></label>
+            <input class="form-control" type="text" id="mentoring_areas" name="mentoring_areas" required
+                   placeholder="e.g. Career Guidance, Interview Prep"
+                   value="{{ form_data.mentoring_areas if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.mentoring_areas else 'false' }}">
+            {% if errors and errors.mentoring_areas %}<span class="field-error">{{ errors.mentoring_areas }}</span>{% endif %}
+          </div>
+
+          <div class="form-group span-2">
+            <label for="availability">Availability <span class="required">*</span></label>
+            <select class="form-control" id="availability" name="availability" required
+                    aria-invalid="{{ 'true' if errors and errors.availability else 'false' }}">
+              <option value="" disabled {{ 'selected' if not form_data else '' }}>Select availability</option>
+              {% for option in availability_options %}
+                <option value="{{ option }}" {{ 'selected' if form_data and form_data.availability == option else '' }}>{{ option }}</option>
+              {% endfor %}
+            </select>
+            {% if errors and errors.availability %}<span class="field-error">{{ errors.availability }}</span>{% endif %}
+          </div>
+
+          <div class="section-divider span-2">Online Profile</div>
+
+          <div class="form-group">
+            <label for="linkedin">LinkedIn Profile</label>
+            <input class="form-control" type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/..."
+                   value="{{ form_data.linkedin if form_data else '' }}">
+          </div>
+
+          <div class="form-group">
+            <label for="portfolio">Portfolio / Website</label>
+            <input class="form-control" type="url" id="portfolio" name="portfolio" placeholder="https://..."
+                   value="{{ form_data.portfolio if form_data else '' }}">
+          </div>
+
+          <div class="section-divider span-2">Application</div>
+
+          <div class="form-group span-2">
+            <label for="reason">Why do you want to become a mentor? <span class="required">*</span></label>
+            <textarea class="form-control" id="reason" name="reason" required minlength="10"
+                      aria-invalid="{{ 'true' if errors and errors.reason else 'false' }}">{{ form_data.reason if form_data else '' }}</textarea>
+            {% if errors and errors.reason %}<span class="field-error">{{ errors.reason }}</span>{% endif %}
+          </div>
+
+          <div class="form-group span-2">
+            <label for="message">Additional Message</label>
+            <textarea class="form-control" id="message" name="message">{{ form_data.message if form_data else '' }}</textarea>
+          </div>
+
+          <div class="section-divider span-2">Document</div>
+
+          <div class="form-group span-2">
+            <label for="resume">Resume / CV <span class="required">*</span></label>
+            <div class="file-drop">
+              <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required data-max-mb="5">
+              <p class="hint">Upload your latest resume or CV. PDF, DOC or DOCX. Maximum 5 MB.</p>
+              <p class="hint" data-file-feedback></p>
+            </div>
+            {% if errors and errors.resume %}<span class="field-error">{{ errors.resume }}</span>{% endif %}
+          </div>
+
+          <div class="form-group span-2">
+            <div class="checkbox-row">
+              <input type="checkbox" id="consent" name="consent" value="yes" required>
+              <label for="consent">I consent to Samunnathi storing and using this information, including my resume, to evaluate my mentor application. <span class="required">*</span></label>
+            </div>
+            {% if errors and errors.consent %}<span class="field-error">{{ errors.consent }}</span>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-submit-row">
+          <button type="submit" class="btn btn-primary">Submit Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{{ url_for('static', filename='assets/js/forms.js') }}"></script>
+{% endblock %}

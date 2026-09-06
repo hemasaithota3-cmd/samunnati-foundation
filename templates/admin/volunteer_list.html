@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% from "admin/_list_macros.html" import filter_bar, pagination_nav %}
+{% block title %}Volunteer Applications | Samunnathi Admin{% endblock %}
+{% block page_title %}Volunteer Applications{% endblock %}
+
+{% block content %}
+<div class="panel">
+  {{ filter_bar(args, statuses, 'volunteer') }}
+
+  <div class="table-scroll">
+    <table class="admin-table">
+      <thead><tr><th>Reference</th><th>Name</th><th>Email</th><th>Availability</th><th>Status</th><th>Submitted</th></tr></thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td><a class="row-link" href="{{ url_for('admin.volunteer_detail', item_id=item.id) }}">{{ item.reference_number }}</a></td>
+          <td>{{ item.full_name }}{% if not item.is_read %} <span class="status-badge status-NEW">NEW</span>{% endif %}</td>
+          <td>{{ item.email }}</td>
+          <td>{{ item.availability }}</td>
+          <td><span class="status-badge status-{{ item.status }}">{{ item.status }}</span></td>
+          <td>{{ item.created_at.strftime("%d %b %Y") }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">No volunteer applications found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {{ pagination_nav(pagination, 'admin.volunteer_list', args) }}
+</div>
+{% endblock %}

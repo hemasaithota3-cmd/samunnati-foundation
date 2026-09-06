@@ -1,0 +1,58 @@
+/**
+ * Brand tokens — sampled and refined from the official Samunnathi logo.
+ * Navy is dominant; green signals growth/education; gold is reserved for
+ * emphasis and primary actions; purple is a supporting accent only.
+ */
+:root {
+  /* ---- Brand colors (sampled from logo) ---- */
+  --primary: #0E2A46;        /* deep navy — dominant */
+  --primary-dark: #081A2C;   /* navy for hover/pressed states */
+  --primary-tint: #E8EDF2;   /* pale navy wash for subtle backgrounds */
+
+  --secondary: #3E7530;      /* natural green — growth & education */
+  --secondary-dark: #2F5B24;
+  --secondary-tint: #E9F1E5;
+
+  --accent: #E9A227;         /* warm gold — used sparingly for emphasis */
+  --accent-dark: #C9860F;
+  --accent-tint: #FBEAC7;
+
+  --supporting: #6B2F89;     /* purple — supporting accent only */
+  --supporting-tint: #F0E5F5;
+
+  --background: #FDFAF5;     /* warm off-white */
+  --surface: #FFFFFF;
+  --surface-alt: #F6F1E8;
+
+  --text: #10233A;           /* deep navy / near-ink for body copy */
+  --muted-text: #55606F;
+  --text-on-primary: #FDFAF5;
+  --text-on-accent: #10233A;
+
+  --border: rgba(16, 35, 58, 0.12);
+  --border-strong: rgba(16, 35, 58, 0.22);
+  --shadow-color: 16, 35, 58;
+
+  /* ---- Type ---- */
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* Fluid type scale */
+  --step-1: clamp(0.85rem, 0.8rem + 0.2vw, 0.95rem);
+  --step0: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --step1: clamp(1.15rem, 1.05rem + 0.4vw, 1.35rem);
+  --step2: clamp(1.4rem, 1.2rem + 0.8vw, 1.85rem);
+  --step3: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+  --step4: clamp(2.25rem, 1.7rem + 2.2vw, 3.4rem);
+  --step5: clamp(2.75rem, 2rem + 3vw, 4.4rem);
+
+  /* ---- Layout ---- */
+  --container-max: 1240px;
+  --container-pad: clamp(1.25rem, 4vw, 3rem);
+  --section-pad-y: clamp(3.5rem, 7vw, 6.5rem);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --nav-height: 76px;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

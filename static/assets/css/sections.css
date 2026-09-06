@@ -1,0 +1,167 @@
+/* ================= WHO WE ARE ================= */
+.who {
+  display: grid;
+  gap: clamp(2rem, 5vw, 3.5rem);
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .who { grid-template-columns: 1fr 0.85fr; }
+}
+.who__mark {
+  position: relative;
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.who__mark svg { width: 62%; height: 62%; }
+
+/* ================= OUR WORK ================= */
+.work-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .work-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1100px) {
+  .work-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.work-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--card-accent, var(--secondary));
+  border-radius: var(--radius-md);
+  padding: 1.75rem 1.5rem;
+  transition: transform 0.22s var(--ease), box-shadow 0.22s var(--ease), border-color 0.22s var(--ease);
+}
+.work-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(var(--shadow-color), 0.1);
+}
+.work-card__icon {
+  width: 46px; height: 46px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card-accent-tint, var(--secondary-tint));
+  color: var(--card-accent, var(--secondary));
+  margin-bottom: 1.1rem;
+}
+.work-card__icon svg { width: 24px; height: 24px; }
+.work-card h3 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+.work-card p { color: var(--muted-text); font-size: var(--step-1); line-height: 1.65; }
+
+.section-cta { margin-top: clamp(2rem, 4vw, 2.75rem); text-align: center; }
+
+/* ================= IMPACT ================= */
+.impact {
+  background: var(--primary);
+  color: var(--text-on-primary);
+}
+.impact .section-title { color: var(--text-on-primary); }
+.impact .section-lede { color: rgba(253, 250, 245, 0.72); }
+.impact .eyebrow { color: var(--accent); }
+.impact .eyebrow::before { background: var(--accent); }
+
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+@media (min-width: 800px) {
+  .impact-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.impact-stat {
+  border-left: 2px solid rgba(253, 250, 245, 0.25);
+  padding-left: 1.1rem;
+}
+.impact-stat__num {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1;
+}
+.impact-stat__label {
+  margin-top: 0.5rem;
+  font-size: var(--step-1);
+  color: rgba(253, 250, 245, 0.78);
+}
+
+/* ================= EVENTS ================= */
+.events-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 700px) { .events-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1080px) { .events-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.event-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.event-card__media {
+  aspect-ratio: 16/10;
+  background: var(--surface-alt);
+}
+.event-card__media img { width: 100%; height: 100%; object-fit: cover; }
+.event-card__body { padding: 1.4rem 1.4rem 1.6rem; display: flex; flex-direction: column; gap: 0.6rem; flex: 1; }
+.event-card__date {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: var(--step-1);
+  font-weight: 600;
+  color: var(--secondary-dark);
+  background: var(--secondary-tint);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+}
+.event-card h3 { font-family: var(--font-body); font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.event-card__loc { font-size: var(--step-1); color: var(--muted-text); }
+.event-card p.event-card__desc { color: var(--muted-text); font-size: var(--step-1); flex: 1; }
+.event-card .btn { margin-top: 0.4rem; align-self: flex-start; }
+
+/* ================= GET INVOLVED (final CTA) ================= */
+.involved {
+  background: linear-gradient(180deg, var(--surface-alt), var(--background));
+}
+.involved-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  margin-top: 2rem;
+}
+@media (min-width: 760px) { .involved-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.involved-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.85rem 1.6rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.involved-card__icon { font-size: 1.9rem; line-height: 1; }
+.involved-card h3 { font-family: var(--font-body); font-weight: 700; font-size: 1.15rem; color: var(--primary); }
+.involved-card p { color: var(--muted-text); font-size: var(--step-1); }
+.involved-card .btn { margin-top: 0.35rem; }

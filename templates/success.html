@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Submitted | Samunnathi Foundation{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="success-wrap">
+      <div class="success-check" aria-hidden="true">✓</div>
+      <h1 class="section-title">{{ kind }} Submitted Successfully</h1>
+      <p class="section-lede" style="margin-inline:auto;">
+        Thank you for contacting Samunnathi.
+        {% if resume_uploaded %}Your resume was uploaded successfully.{% endif %}
+        Our team will review your {{ 'request' if kind == 'Guidance Request' else 'application' }} and contact you soon.
+      </p>
+      <div class="success-ref">{{ record.reference_number }}</div>
+      <p class="section-lede" style="margin-inline:auto;margin-top:1rem;">
+        A confirmation email has been sent to <strong>{{ record.email }}</strong>.
+      </p>
+      <div style="margin-top:2rem;">
+        <a href="{{ url_for('public.home') }}" class="btn btn-outline">Back to Home</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

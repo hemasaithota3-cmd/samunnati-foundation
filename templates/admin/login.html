@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Login | Samunnathi</title>
+  <link rel="icon" href="{{ url_for('static', filename='assets/images/logo/logo-nav.png') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/variables.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='admin/css/admin.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/forms.css') }}" />
+</head>
+<body class="admin-body">
+  <div class="login-wrap">
+    <div class="login-card">
+      <img src="{{ url_for('static', filename='assets/images/logo/logo-nav.png') }}" alt="Samunnathi" />
+      <h1 class="section-title" style="font-size:1.4rem;margin-bottom:1.5rem;">Samunnathi Admin</h1>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label for="email">Email</label>
+          <input class="form-control" type="email" id="email" name="email" required autofocus>
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label for="password">Password</label>
+          <input class="form-control" type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Log In</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

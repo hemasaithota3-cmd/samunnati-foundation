@@ -1,0 +1,73 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard | Samunnathi Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-card__label">Guidance Requests</div>
+    <div class="stat-card__num">{{ stats.guidance_total }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__label">Mentor Applications</div>
+    <div class="stat-card__num">{{ stats.mentor_total }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__label">Volunteer Applications</div>
+    <div class="stat-card__num">{{ stats.volunteer_total }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__label">Unread Notifications</div>
+    <div class="stat-card__num">{{ stats.unread_notifications }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__label">New Applications</div>
+    <div class="stat-card__num">{{ stats.new_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__label">Under Review</div>
+    <div class="stat-card__num">{{ stats.reviewing_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card__label">Approved</div>
+    <div class="stat-card__num">{{ stats.approved_count }}</div>
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div class="panel">
+    <div class="panel__head"><h2>Recent Applications</h2></div>
+    <div class="table-scroll">
+      <table class="admin-table">
+        <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Submitted</th></tr></thead>
+        <tbody>
+          {% for row in recent %}
+          {% set detail_endpoint = "admin." ~ row.type ~ "_detail" %}
+          <tr>
+            <td><a class="row-link" href="{{ url_for(detail_endpoint, item_id=row.item.id) }}">{{ row.item.full_name }}</a></td>
+            <td style="text-transform:capitalize;">{{ row.type }}</td>
+            <td><span class="status-badge status-{{ row.item.status }}">{{ row.item.status }}</span></td>
+            <td>{{ row.item.created_at.strftime("%d %b %Y") }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4">No applications yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel__head"><h2>Recent Notifications</h2></div>
+    {% for n in recent_notifications %}
+      <a href="{{ n.detail_url() }}" style="display:block; padding:0.6rem 0; border-bottom:1px solid var(--border); {{ 'opacity:0.6;' if n.is_read }}">
+        <strong style="font-size:0.88rem;">{{ n.title }}</strong>
+        <div style="font-size:0.82rem; color:var(--muted-text);">{{ n.message }}</div>
+        <div style="font-size:0.72rem; color:var(--muted-text); margin-top:0.2rem;">{{ n.created_at.strftime("%d %b, %H:%M") }}</div>
+      </a>
+    {% else %}
+      <p style="color:var(--muted-text); font-size:0.88rem;">No notifications yet.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

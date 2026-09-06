@@ -1,0 +1,43 @@
+{% extends "admin/base.html" %}
+{% from "admin/_detail_actions.html" import actions_panel %}
+{% block title %}{{ item.reference_number }} | Samunnathi Admin{% endblock %}
+{% block page_title %}Mentor Application{% endblock %}
+
+{% block content %}
+<div class="detail-grid">
+  <div class="panel">
+    <div class="panel__head">
+      <h2>{{ item.reference_number }}</h2>
+      <span class="status-badge status-{{ item.status }}">{{ item.status }}</span>
+    </div>
+    <dl class="kv-list">
+      <dt>Name</dt><dd>{{ item.full_name }}</dd>
+      <dt>Email</dt><dd>{{ item.email }}</dd>
+      <dt>Phone</dt><dd>{{ item.phone }}</dd>
+      <dt>Location</dt><dd>{{ item.location }}</dd>
+      <dt>Qualification</dt><dd>{{ item.qualification }}</dd>
+      <dt>Profession</dt><dd>{{ item.profession }}</dd>
+      <dt>Organization</dt><dd>{{ item.organization or "—" }}</dd>
+      <dt>Experience</dt><dd>{{ item.years_experience or "—" }}</dd>
+      <dt>Expertise</dt><dd>{{ item.expertise }}</dd>
+      <dt>Mentoring Areas</dt><dd>{{ item.mentoring_areas }}</dd>
+      <dt>Availability</dt><dd>{{ item.availability }}</dd>
+      <dt>LinkedIn</dt><dd>{% if item.linkedin %}<a href="{{ item.linkedin }}" target="_blank" rel="noopener noreferrer">{{ item.linkedin }}</a>{% else %}—{% endif %}</dd>
+      <dt>Portfolio</dt><dd>{% if item.portfolio %}<a href="{{ item.portfolio }}" target="_blank" rel="noopener noreferrer">{{ item.portfolio }}</a>{% else %}—{% endif %}</dd>
+      <dt>Reason</dt><dd>{{ item.reason }}</dd>
+      <dt>Message</dt><dd>{{ item.message or "—" }}</dd>
+      <dt>Submitted</dt><dd>{{ item.created_at.strftime("%d %B %Y, %H:%M") }}</dd>
+    </dl>
+
+    <div style="margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid var(--border);">
+      <p style="font-weight:700; color:var(--primary); margin-bottom:0.6rem;">📄 {{ item.resume_original_name }}</p>
+      <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+        <a href="{{ url_for('admin.mentor_resume_view', item_id=item.id) }}" class="btn btn-outline btn-sm" target="_blank" rel="noopener noreferrer">View Resume</a>
+        <a href="{{ url_for('admin.mentor_resume_download', item_id=item.id) }}" class="btn btn-primary btn-sm">Download Resume</a>
+      </div>
+    </div>
+  </div>
+
+  {{ actions_panel('mentor', item, statuses) }}
+</div>
+{% endblock %}

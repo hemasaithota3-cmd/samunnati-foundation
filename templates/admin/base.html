@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Samunnathi Admin{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='assets/images/logo/logo-nav.png') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/variables.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='admin/css/admin.css') }}" />
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="admin-body"
+      data-notifications-poll-url="{{ url_for('admin.notifications_poll') }}"
+      data-notifications-poll-interval="{{ notification_poll_interval }}">
+  <div class="admin-shell">
+    <aside class="admin-sidebar" data-admin-sidebar>
+      <div class="admin-sidebar__brand">
+        <img src="{{ url_for('static', filename='assets/images/logo/logo-nav.png') }}" alt="Samunnathi" />
+        <span>Samunnathi Admin</span>
+      </div>
+      <nav class="admin-nav">
+        <a href="{{ url_for('admin.dashboard') }}" class="{{ 'active' if request.endpoint == 'admin.dashboard' }}">📊 Dashboard</a>
+        <a href="{{ url_for('admin.guidance_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.guidance') }}">📩 Guidance Requests</a>
+        <a href="{{ url_for('admin.mentor_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.mentor') }}">🎓 Mentor Applications</a>
+        <a href="{{ url_for('admin.volunteer_list') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.volunteer') }}">🤝 Volunteer Applications</a>
+        <a href="{{ url_for('admin.notifications') }}" class="{{ 'active' if request.endpoint == 'admin.notifications' }}">
+          🔔 Notifications
+          {% if unread_notifications %}<span class="badge-count">{{ unread_notifications }}</span>{% endif %}
+        </a>
+        <a href="/events">📅 Events</a>
+        <a href="/gallery">🖼️ Gallery</a>
+        <a href="{{ url_for('auth.change_password') }}" class="{{ 'active' if request.endpoint == 'auth.change_password' }}">⚙️ Settings</a>
+      </nav>
+      <div class="admin-sidebar__footer">
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button type="submit">Logout</button>
+        </form>
+      </div>
+    </aside>
+
+    <div class="admin-main">
+      <header class="admin-topbar">
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+          <button class="bell-btn" data-sidebar-toggle style="display:none" aria-label="Toggle menu">☰</button>
+          <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+        </div>
+        <div class="admin-topbar__right">
+          <a href="{{ url_for('admin.notifications') }}" class="bell-btn" aria-label="Notifications">
+            🔔
+            <span class="bell-btn__count" data-bell-count style="{{ '' if unread_notifications else 'display:none' }}">{{ unread_notifications }}</span>
+          </a>
+          <span style="font-size:0.85rem; color:var(--muted-text);">{{ current_user.name }}</span>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash flash-{{ 'error' if category == 'error' else category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" data-toast-container></div>
+  <script src="{{ url_for('static', filename='admin/js/admin.js') }}" defer></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

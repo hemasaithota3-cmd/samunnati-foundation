@@ -1,0 +1,59 @@
+{% macro filter_bar(args, statuses, app_type) %}
+<form method="get" class="admin-form-row">
+  <div class="form-group">
+    <label for="q">Search</label>
+    <input class="admin-input" type="text" id="q" name="q" placeholder="Name, email, phone, reference" value="{{ args.get('q','') }}">
+  </div>
+  <div class="form-group">
+    <label for="status">Status</label>
+    <select class="admin-input" id="status" name="status">
+      <option value="">All</option>
+      {% for s in statuses %}
+        <option value="{{ s }}" {{ 'selected' if args.get('status') == s else '' }}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="date_from">From</label>
+    <input class="admin-input" type="date" id="date_from" name="date_from" value="{{ args.get('date_from','') }}">
+  </div>
+  <div class="form-group">
+    <label for="date_to">To</label>
+    <input class="admin-input" type="date" id="date_to" name="date_to" value="{{ args.get('date_to','') }}">
+  </div>
+  <button type="submit" class="btn btn-outline btn-sm">Apply</button>
+  <a href="{{ url_for('admin.export_list', app_type=app_type, fmt='csv', q=args.get('q',''), status=args.get('status',''), date_from=args.get('date_from',''), date_to=args.get('date_to','')) }}" class="btn btn-outline btn-sm">Export CSV</a>
+  <a href="{{ url_for('admin.export_list', app_type=app_type, fmt='excel', q=args.get('q',''), status=args.get('status',''), date_from=args.get('date_from',''), date_to=args.get('date_to','')) }}" class="btn btn-outline btn-sm">Export Excel</a>
+</form>
+{% endmacro %}
+
+{% macro pagination_nav(pagination, base_endpoint, args) %}
+<div class="pagination">
+  {% if pagination.has_prev %}
+    <a href="{{ url_for(base_endpoint, page=pagination.prev_num, q=args.get('q',''), status=args.get('status',''), date_from=args.get('date_from',''), date_to=args.get('date_to','')) }}">Previous</a>
+  {% else %}
+    <span class="disabled">Previous</span>
+  {% endif %}
+
+  {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+    {% if p %}
+      {% if p == pagination.page %}
+        <span class="current">{{ p }}</span>
+      {% else %}
+        <a href="{{ url_for(base_endpoint, page=p, q=args.get('q',''), status=args.get('status',''), date_from=args.get('date_from',''), date_to=args.get('date_to','')) }}">{{ p }}</a>
+      {% endif %}
+    {% else %}
+      <span class="disabled">…</span>
+    {% endif %}
+  {% endfor %}
+
+  {% if pagination.has_next %}
+    <a href="{{ url_for(base_endpoint, page=pagination.next_num, q=args.get('q',''), status=args.get('status',''), date_from=args.get('date_from',''), date_to=args.get('date_to','')) }}">Next</a>
+  {% else %}
+    <span class="disabled">Next</span>
+  {% endif %}
+</div>
+<p style="font-size:0.82rem; color:var(--muted-text); margin-top:0.5rem;">
+  Showing {{ pagination.first if pagination.first is defined else ((pagination.page-1)*pagination.per_page + 1) }}–{{ ((pagination.page-1)*pagination.per_page + pagination.items|length) }} of {{ pagination.total }}
+</p>
+{% endmacro %}

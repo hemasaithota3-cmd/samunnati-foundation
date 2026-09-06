@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Become a Volunteer | Samunnathi Foundation{% endblock %}
+{% block meta_description %}Contribute your time, skills, and creativity to Samunnathi's mission. Apply to become a volunteer.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/forms.css') }}" />
+<style>
+  /* 1. Fully hide main navigation, desktop action buttons, AND mobile burger/toggle triggers */
+  header nav,
+  header .nav-links,
+  header .header-actions,
+  header .site-header__actions,
+  header .site-header__nav,
+  header .btn,
+  header a[href*="guidance"],
+  header a[href*="join"],
+  header .mobile-nav-toggle,
+  header .hamburger,
+  header .menu-toggle,
+  header button[aria-label*="menu" i],
+  header button[class*="toggle" i],
+  header button[class*="burger" i],
+  header button[class*="mobile" i],
+  header summary {
+    display: none !important;
+  }
+
+  /* 2. Enable absolute positioning context inside header */
+  header,
+  .site-header {
+    position: relative !important;
+  }
+
+  /* 3. Styled header Back button */
+  .header-back-btn {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #1e293b;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 9999px;
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
+    z-index: 1000;
+  }
+
+  .header-back-btn:hover {
+    background-color: #e2e8f0;
+    border-color: #94a3b8;
+    color: #0f172a;
+    transform: translateY(-50%) translateX(-2px);
+  }
+
+  .header-back-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
+  /* Mobile screen alignment adjustments */
+  @media (max-width: 640px) {
+    .header-back-btn {
+      right: 1rem;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.85rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dynamically inserted Back button placed into navbar -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const header = document.querySelector("header") || document.querySelector(".site-header");
+    if (header && !document.querySelector(".header-back-btn")) {
+      const backBtn = document.createElement("a");
+      backBtn.href = "javascript:history.back()";
+      backBtn.className = "header-back-btn";
+      backBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" />
+        </svg>
+        Back
+      `;
+      header.appendChild(backBtn);
+    }
+  });
+</script>
+
+<section class="info-hero">
+  <div class="container">
+    <p class="eyebrow">Become a Volunteer</p>
+    <h1 class="info-hero__title">Become a Volunteer</h1>
+    <p class="info-hero__lede">Volunteers contribute time, skills, knowledge, creativity, and community support — there are many ways to be part of the Samunnathi mission.</p>
+    <div class="info-hero__actions">
+      <a href="#form" class="btn btn-primary">Apply as a Volunteer</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="info-grid">
+      <article class="info-card" style="border-top-color: var(--accent-dark)">
+        <h3>Why Volunteer?</h3>
+        <p>Your time directly changes what a student is able to access and imagine for themselves.</p>
+      </article>
+      <article class="info-card" style="border-top-color: var(--accent-dark)">
+        <h3>What You Can Do</h3>
+        <p>Teach a session, organize an event, design materials, or support outreach in your community.</p>
+      </article>
+      <article class="info-card" style="border-top-color: var(--accent-dark)">
+        <h3>Volunteer Opportunities</h3>
+        <p>Workshops, school visits, content creation, and operational support — matched to your availability.</p>
+      </article>
+      <article class="info-card" style="border-top-color: var(--accent-dark)">
+        <h3>How It Works</h3>
+        <p>Apply below, tell us your skills and availability, and our team will reach out with next steps.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section form-section" id="form">
+  <div class="container">
+    <div class="section-head center">
+      <p class="eyebrow" style="justify-content:center">Apply as a volunteer</p>
+      <h2 class="section-title">Tell us how you'd like to help</h2>
+      <p class="section-lede" style="margin-inline:auto;text-align:center;">Fields marked <span class="required">*</span> are required.</p>
+    </div>
+
+    <div class="form-card">
+      <form method="post" action="{{ url_for('volunteer.volunteer_submit') }}" data-validate novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <div class="form-grid cols-2">
+          <div class="form-group">
+            <label for="full_name">Full Name <span class="required">*</span></label>
+            <input class="form-control" type="text" id="full_name" name="full_name" required
+                   value="{{ form_data.full_name if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.full_name else 'false' }}">
+            {% if errors and errors.full_name %}<span class="field-error">{{ errors.full_name }}</span>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email <span class="required">*</span></label>
+            <input class="form-control" type="email" id="email" name="email" required
+                   value="{{ form_data.email if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.email else 'false' }}">
+            {% if errors and errors.email %}<span class="field-error">{{ errors.email }}</span>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number <span class="required">*</span></label>
+            <input class="form-control" type="tel" id="phone" name="phone" required
+                   value="{{ form_data.phone if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.phone else 'false' }}">
+            {% if errors and errors.phone %}<span class="field-error">{{ errors.phone }}</span>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="location">Location <span class="required">*</span></label>
+            <input class="form-control" type="text" id="location" name="location" required
+                   value="{{ form_data.location if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.location else 'false' }}">
+            {% if errors and errors.location %}<span class="field-error">{{ errors.location }}</span>{% endif %}
+          </div>
+
+          <div class="form-group span-2">
+            <label for="education_profession">Education / Profession</label>
+            <input class="form-control" type="text" id="education_profession" name="education_profession"
+                   value="{{ form_data.education_profession if form_data else '' }}">
+          </div>
+
+          <div class="form-group span-2">
+            <label for="skills">Skills <span class="required">*</span></label>
+            <input class="form-control" type="text" id="skills" name="skills" required
+                   placeholder="e.g. Teaching, Design, Communication"
+                   value="{{ form_data.skills if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.skills else 'false' }}">
+            {% if errors and errors.skills %}<span class="field-error">{{ errors.skills }}</span>{% endif %}
+          </div>
+
+          <div class="form-group span-2">
+            <label for="areas_of_interest">Areas of Interest <span class="required">*</span></label>
+            <input class="form-control" type="text" id="areas_of_interest" name="areas_of_interest" required
+                   placeholder="e.g. Education, Events, Content"
+                   value="{{ form_data.areas_of_interest if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.areas_of_interest else 'false' }}">
+            {% if errors and errors.areas_of_interest %}<span class="field-error">{{ errors.areas_of_interest }}</span>{% endif %}
+          </div>
+
+          <div class="form-group span-2">
+            <label for="availability">Availability <span class="required">*</span></label>
+            <input class="form-control" type="text" id="availability" name="availability" required
+                   placeholder="e.g. Weekends, 2 hours/week"
+                   value="{{ form_data.availability if form_data else '' }}"
+                   aria-invalid="{{ 'true' if errors and errors.availability else 'false' }}">
+            {% if errors and errors.availability %}<span class="field-error">{{ errors.availability }}</span>{% endif %}
+          </div>
+
+          <div class="form-group span-2">
+            <label for="previous_experience">Previous Volunteer Experience</label>
+            <textarea class="form-control" id="previous_experience" name="previous_experience">{{ form_data.previous_experience if form_data else '' }}</textarea>
+          </div>
+
+          <div class="form-group span-2">
+            <label for="reason">Why do you want to volunteer? <span class="required">*</span></label>
+            <textarea class="form-control" id="reason" name="reason" required minlength="10"
+                      aria-invalid="{{ 'true' if errors and errors.reason else 'false' }}">{{ form_data.reason if form_data else '' }}</textarea>
+            {% if errors and errors.reason %}<span class="field-error">{{ errors.reason }}</span>{% endif %}
+          </div>
+
+          <div class="form-group span-2">
+            <label for="message">Message</label>
+            <textarea class="form-control" id="message" name="message">{{ form_data.message if form_data else '' }}</textarea>
+          </div>
+
+          <div class="form-group span-2">
+            <div class="checkbox-row">
+              <input type="checkbox" id="consent" name="consent" value="yes" required>
+              <label for="consent">I consent to Samunnathi storing and using this information to evaluate my volunteer application. <span class="required">*</span></label>
+            </div>
+            {% if errors and errors.consent %}<span class="field-error">{{ errors.consent }}</span>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-submit-row">
+          <button type="submit" class="btn btn-primary">Submit Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{{ url_for('static', filename='assets/js/forms.js') }}"></script>
+{% endblock %}

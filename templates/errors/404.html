@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found | Samunnathi{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="success-wrap">
+      <h1 class="section-title">Page not found</h1>
+      <p class="section-lede" style="margin-inline:auto;">The page you're looking for doesn't exist or may have moved.</p>
+      <div style="margin-top:2rem;">
+        <a href="{{ url_for('public.home') }}" class="btn btn-primary">Back to Home</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

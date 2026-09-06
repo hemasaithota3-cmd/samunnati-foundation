@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Samunnathi Foundation | Empowering Students, Guiding Futures{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Samunnathi is a student-focused foundation connecting students with educational guidance, career direction, mentors, and opportunities. Rise. Educate. Empower.{% endblock %}" />
+  <link rel="canonical" href="{{ request.url_root.rstrip('/') }}{{ request.path }}" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Samunnathi Foundation" />
+  <meta property="og:title" content="{% block og_title %}Samunnathi Foundation{% endblock %}" />
+  <meta property="og:description" content="{% block og_description %}Connecting students with education, career guidance, mentors, and opportunities.{% endblock %}" />
+  <meta property="og:image" content="{{ url_for('static', filename='assets/images/logo/logo-lg.png') }}" />
+  <meta property="og:url" content="{{ request.url }}" />
+  <meta name="twitter:card" content="summary" />
+
+  <link rel="icon" href="{{ url_for('static', filename='assets/images/logo/logo-nav.png') }}" sizes="192x192" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" />
+
+  <link rel="preload" as="image" href="{{ url_for('static', filename='assets/images/logo/logo-nav.webp') }}" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/variables.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/base.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/navbar.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/hero.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/sections.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/scroller.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/footer.css') }}" />
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- ================= NAVBAR ================= -->
+  <header class="navbar">
+    <div class="container navbar__inner">
+      <a href="{{ url_for('public.home') }}" class="navbar__brand" aria-label="Samunnathi home">
+        <picture>
+          <source srcset="{{ url_for('static', filename='assets/images/logo/logo-nav.webp') }}" type="image/webp" />
+          <img src="{{ url_for('static', filename='assets/images/logo/logo-nav.png') }}" alt="Samunnathi logo" width="42" height="42" fetchpriority="high" />
+        </picture>
+        <span class="navbar__brand-text">Samunnathi</span>
+      </a>
+
+      <nav class="navbar__links" aria-label="Primary">
+        <a href="{{ url_for('public.home') }}" {% if request.path == '/' %}aria-current="page"{% endif %}>Home</a>
+        <a href="#about-preview">About</a>
+        <a href="#our-work">Our Work</a>
+        <a href="#impact">Impact</a>
+        <a href="#co-founders">Co-Founders</a>
+        <a href="#events">Events</a>
+        <a href="#gallery">Gallery</a>
+      </nav>
+
+      <div class="navbar__actions">
+        <a href="{{ url_for('guidance.guidance_page') }}" class="btn btn-outline btn-sm">Get Guidance</a>
+        <a href="#get-involved" class="btn btn-primary btn-sm">Join Us</a>
+      </div>
+
+      <button class="navbar__toggle" data-nav-toggle aria-label="Open menu" aria-expanded="false" aria-controls="mobile-drawer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile drawer -->
+  <div class="navbar__drawer" id="mobile-drawer" data-nav-drawer data-open="false" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+    <div class="navbar__scrim" data-nav-scrim></div>
+    <div class="navbar__panel" data-nav-panel>
+      <div class="navbar__panel-head">
+        <img src="{{ url_for('static', filename='assets/images/logo/logo-nav.png') }}" alt="Samunnathi logo" width="36" height="36" />
+        <button class="navbar__panel-close" data-nav-close aria-label="Close menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+        </button>
+      </div>
+      <nav class="navbar__panel-links" aria-label="Mobile primary">
+        <a href="{{ url_for('public.home') }}">Home</a>
+        <a href="#about-preview">About</a>
+        <a href="#our-work">Our Work</a>
+        <a href="#impact">Impact</a>
+        <a href="#co-founders">Co-Founders</a>
+        <a href="#events">Events</a>
+        <a href="#gallery">Gallery</a>
+      </nav>
+      <div class="navbar__panel-actions">
+        <a href="{{ url_for('guidance.guidance_page') }}" class="btn btn-outline btn-full">Get Guidance</a>
+        <a href="#get-involved" class="btn btn-primary btn-full">Join Us</a>
+      </div>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container" style="padding-top:1rem;">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}" role="status">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="footer">
+    <div class="container footer__grid">
+      <div>
+        <a href="{{ url_for('public.home') }}" class="footer__brand" aria-label="Samunnathi home">
+          <img src="{{ url_for('static', filename='assets/images/logo/logo-nav.png') }}" alt="Samunnathi logo" width="38" height="38" loading="lazy" />
+          <span class="footer__brand-text">Samunnathi</span>
+        </a>
+        <p class="footer__desc">A student-focused foundation connecting students with education, career guidance, mentors, and opportunities.</p>
+        <div class="footer__social">
+          <a href="https://instagram.com/" aria-label="Samunnathi on Instagram" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1"/></svg>
+          </a>
+          <a href="https://linkedin.com/" aria-label="Samunnathi on LinkedIn" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="7.5" y1="10" x2="7.5" y2="17"/><circle cx="7.5" cy="6.8" r="0.9" fill="currentColor" stroke="none"/><path d="M11.5 17v-4.2c0-1.4 1-2.3 2.3-2.3 1.3 0 2.2.9 2.2 2.3V17"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <nav aria-label="Quick links">
+        <p class="footer__heading">Quick Links</p>
+        <div class="footer__links">
+          <a href="{{ url_for('public.home') }}">Home</a>
+          <a href="#about-preview">About</a>
+          <a href="#our-work">Our Work</a>
+          <a href="#impact">Impact</a>
+          <a href="#co-founders">Co-Founders</a>
+          <a href="#events">Events</a>
+          <a href="#gallery">Gallery</a>
+        </div>
+      </nav>
+
+      <nav aria-label="Get involved">
+        <p class="footer__heading">Get Involved</p>
+        <div class="footer__links">
+          <a href="{{ url_for('guidance.guidance_page') }}">Get Guidance</a>
+          <a href="{{ url_for('mentor.mentor_page') }}">Become a Mentor</a>
+          <a href="{{ url_for('volunteer.volunteer_page') }}">Become a Volunteer</a>
+        </div>
+      </nav>
+
+      <div>
+        <p class="footer__heading">Contact</p>
+        <div class="footer__contact">
+          <a href="mailto:hello@samunnathi.org">hello@samunnathi.org</a>
+          <a href="tel:+910000000000">+91 00000 00000 <span style="opacity:.6">(placeholder)</span></a>
+          <span>City, State <span style="opacity:.6">(placeholder)</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="container footer__bottom">
+      <span>© {{ current_year }} Samunnathi Foundation. All rights reserved.</span>
+      <span>Rise. Educate. Empower.</span>
+    </div>
+  </footer>
+
+  <script type="module" src="{{ url_for('static', filename='assets/js/main.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

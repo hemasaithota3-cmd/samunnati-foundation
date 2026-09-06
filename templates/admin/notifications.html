@@ -1,0 +1,22 @@
+{% extends "admin/base.html" %}
+{% block title %}Notifications | Samunnathi Admin{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="panel">
+  {% for n in items %}
+    <a href="{{ n.detail_url() }}" style="display:flex; justify-content:space-between; gap:1rem; padding:0.85rem 0; border-bottom:1px solid var(--border); {{ 'opacity:0.6;' if n.is_read }}">
+      <div>
+        <strong style="font-size:0.92rem;">{{ n.title }}</strong>
+        <div style="font-size:0.85rem; color:var(--muted-text); margin-top:0.15rem;">{{ n.message }}</div>
+      </div>
+      <div style="font-size:0.78rem; color:var(--muted-text); white-space:nowrap;">
+        {{ n.created_at.strftime("%d %b, %H:%M") }}
+        {% if not n.is_read %}<div class="status-badge status-NEW" style="margin-top:0.3rem;">NEW</div>{% endif %}
+      </div>
+    </a>
+  {% else %}
+    <p style="color:var(--muted-text);">No notifications yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% macro actions_panel(app_type, item, statuses) %}
+<div class="panel">
+  <div class="panel__head"><h2>Actions</h2></div>
+  <div class="action-stack">
+    <form method="post" action="{{ url_for('admin.change_status', app_type=app_type, item_id=item.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <div class="form-group" style="margin-bottom:0.5rem;">
+        <label for="status" style="font-size:0.78rem; font-weight:700; color:var(--muted-text); text-transform:uppercase;">Status</label>
+        <select class="admin-input" style="width:100%;" id="status" name="status" onchange="this.form.submit()">
+          {% for s in statuses %}
+            <option value="{{ s }}" {{ 'selected' if item.status == s else '' }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+
+    <a href="{{ url_for('admin.application_pdf', app_type=app_type, item_id=item.id) }}" class="btn btn-outline btn-sm">Download PDF</a>
+
+    <form method="post" action="{{ url_for('admin.resend_email', app_type=app_type, item_id=item.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button type="submit" class="btn btn-outline btn-sm btn-full">Resend Confirmation Email</button>
+    </form>
+
+    <details>
+      <summary style="cursor:pointer; font-size:0.85rem; font-weight:700; color:var(--primary); margin-bottom:0.5rem;">Reply by Email</summary>
+      <form method="post" action="{{ url_for('admin.reply_email', app_type=app_type, item_id=item.id) }}" style="margin-top:0.5rem;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <div class="form-group" style="margin-bottom:0.5rem;">
+          <input class="admin-input" style="width:100%;" type="text" name="subject" placeholder="Subject" required>
+        </div>
+        <div class="form-group" style="margin-bottom:0.5rem;">
+          <textarea class="admin-input" style="width:100%; min-height:100px;" name="body" placeholder="Message" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm btn-full">Send Reply</button>
+      </form>
+    </details>
+
+    <form method="post" action="{{ url_for('admin.delete_application', app_type=app_type, item_id=item.id) }}"
+          onsubmit="return confirm('Delete this application permanently? This cannot be undone.');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button type="submit" class="btn btn-outline btn-sm btn-full" style="color:#A32626; border-color:#A32626;">Delete Application</button>
+    </form>
+  </div>
+</div>
+{% endmacro %}

@@ -1,0 +1,29 @@
+{% extends "admin/base.html" %}
+{% from "admin/_detail_actions.html" import actions_panel %}
+{% block title %}{{ item.reference_number }} | Samunnathi Admin{% endblock %}
+{% block page_title %}Guidance Request{% endblock %}
+
+{% block content %}
+<div class="detail-grid">
+  <div class="panel">
+    <div class="panel__head">
+      <h2>{{ item.reference_number }}</h2>
+      <span class="status-badge status-{{ item.status }}">{{ item.status }}</span>
+    </div>
+    <dl class="kv-list">
+      <dt>Name</dt><dd>{{ item.full_name }}</dd>
+      <dt>Email</dt><dd>{{ item.email }}</dd>
+      <dt>Phone</dt><dd>{{ item.phone }}</dd>
+      <dt>Education Level</dt><dd>{{ item.education_level }}</dd>
+      <dt>Institution</dt><dd>{{ item.institution or "—" }}</dd>
+      <dt>Location</dt><dd>{{ item.location }}</dd>
+      <dt>Guidance Area</dt><dd>{{ item.guidance_area }}</dd>
+      <dt>Preferred Contact</dt><dd>{{ item.preferred_contact or "—" }}</dd>
+      <dt>Message</dt><dd>{{ item.message }}</dd>
+      <dt>Submitted</dt><dd>{{ item.created_at.strftime("%d %B %Y, %H:%M") }}</dd>
+    </dl>
+  </div>
+
+  {{ actions_panel('guidance', item, statuses) }}
+</div>
+{% endblock %}
