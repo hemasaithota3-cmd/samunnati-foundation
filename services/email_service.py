@@ -4,10 +4,8 @@ directly. A failed send is logged to email_logs and returns False — it never
 raises, and it never causes an application record to be rolled back.
 """
 import logging
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
+import resend
 from flask import current_app
 
 from models import db
@@ -55,23 +53,23 @@ TEMPLATES = {
 
 def _send_raw(to_address: str, subject: str, body: str) -> tuple[bool, str | None]:
     cfg = current_app.config
-    if not cfg.get("MAIL_SERVER") or not cfg.get("MAIL_USERNAME"):
-        return False, "Email is not configured (MAIL_SERVER / MAIL_USERNAME missing)."
+    api_key = cfg.get("RESEND_API_KEY")
+    if not api_key:
+        return False, "Email is not configured (RESEND_API_KEY missing)."
 
-    msg = MIMEMultipart()
-    msg["From"] = cfg.get("MAIL_DEFAULT_SENDER") or cfg["MAIL_USERNAME"]
-    msg["To"] = to_address
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
+    sender = cfg.get("MAIL_DEFAULT_SENDER") or "Samunnathi <onboarding@resend.dev>"
 
     try:
-        with smtplib.SMTP(cfg["MAIL_SERVER"], cfg["MAIL_PORT"], timeout=10) as server:
-            if cfg.get("MAIL_USE_TLS", True):
-                server.starttls()
-            server.login(cfg["MAIL_USERNAME"], cfg["MAIL_PASSWORD"])
-            server.sendmail(msg["From"], [to_address], msg.as_string())
+        resend.api_key = api_key
+        params = {
+            "from": sender,
+            "to": [to_address],
+            "subject": subject,
+            "text": body,
+        }
+        resend.Emails.send(params)
         return True, None
-    except Exception as exc:  # noqa: BLE001 - catch and log any SMTP failure
+    except Exception as exc:  # noqa: BLE001 - catch and log any Resend API failure
         logger.error("Email send failed to %s: %s", to_address, exc)
         return False, str(exc)
 
