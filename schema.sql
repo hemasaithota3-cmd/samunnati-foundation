@@ -46,29 +46,40 @@ CREATE TABLE IF NOT EXISTS guidance_requests (
 CREATE TABLE IF NOT EXISTS mentor_applications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     reference_number VARCHAR(20) UNIQUE,
+
     full_name VARCHAR(150) NOT NULL,
     email VARCHAR(190) NOT NULL,
     phone VARCHAR(30) NOT NULL,
+
     location VARCHAR(150) NOT NULL,
     qualification VARCHAR(150) NOT NULL,
     profession VARCHAR(150) NOT NULL,
     organization VARCHAR(200) NULL,
     years_experience VARCHAR(30) NULL,
+
     expertise TEXT NOT NULL,
     mentoring_areas TEXT NOT NULL,
     availability VARCHAR(60) NOT NULL,
+
     linkedin VARCHAR(255) NULL,
     portfolio VARCHAR(255) NULL,
+
     reason TEXT NOT NULL,
     message TEXT NULL,
+
     resume_original_name VARCHAR(255) NOT NULL,
-    resume_stored_name VARCHAR(255) NOT NULL UNIQUE,
-    resume_path VARCHAR(500) NOT NULL,
-    resume_uploaded_at DATETIME NULL,
+resume_data LONGBLOB NOT NULL,
+resume_stored_name VARCHAR(255) NULL UNIQUE,
+resume_path VARCHAR(500) NULL,
+resume_uploaded_at DATETIME NULL,
+
     status VARCHAR(20) NOT NULL DEFAULT 'NEW',
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
+
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
     INDEX idx_mentor_email (email),
     INDEX idx_mentor_reference (reference_number),
     INDEX idx_mentor_status (status),

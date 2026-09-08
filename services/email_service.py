@@ -5,7 +5,9 @@ raises, and it never causes an application record to be rolled back.
 """
 import logging
 
-import resend
+
+import smtplib
+from email.mime.text import MIMEText
 from flask import current_app
 
 from models import db
@@ -53,11 +55,63 @@ TEMPLATES = {
 
 def _send_raw(to_address: str, subject: str, body: str) -> tuple[bool, str | None]:
     cfg = current_app.config
+    host = cfg.get("MAIL_SERVER")
+    port = cfg.get("MAIL_PORT")
+    use_tls = cfg.get("MAIL_USE_TLS")
+    username = cfg.get("MAIL_USERNAME")
+    password = cfg.get("MAIL_PASSWORD")
+    sender = cfg.get("MAIL_DEFAULT_SENDER")
+
+    if not username or not password:
+        return False, "Email is not configured (MAIL_USERNAME/MAIL_PASSWORD missing)."
+    if not sender:
+        return False, "Email is not configured (MAIL_DEFAULT_SENDER missing)."
+
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = sender
+    msg["To"] = to_address
+
+    try:
+        with smtplib.SMTP(host, port, timeout=30) as server:
+            if use_tls:
+                server.starttls()
+            server.login(username, password)
+            server.sendmail(sender, [to_address], msg.as_string())
+        return True, None
+    except Exception as exc:  # noqa: BLE001 - catch and log any SMTP failure
+        logger.error("Email send failed to %s: %s", to_address, exc)
+        return False, str(exc)
+    cfg = current_app.config
     api_key = cfg.get("RESEND_API_KEY")
     if not api_key:
         return False, "Email is not configured (RESEND_API_KEY missing)."
 
-    sender = cfg.get("MAIL_DEFAULT_SENDER") or "Samunnathi <onboarding@resend.dev>"
+    sender = cfg.get("MAIL_DEFAULT_SENDER")
+    if not sender:
+        return False, "Email is not configured (MAIL_DEFAULT_SENDER missing)."
+
+    try:
+        resend.api_key = api_key
+        params = {
+            "from": sender,
+            "to": [to_address],
+            "subject": subject,
+            "text": body,
+        }
+        resend.Emails.send(params)
+        return True, None
+    except Exception as exc:  # noqa: BLE001 - catch and log any Resend API failure
+        logger.error("Email send failed to %s: %s", to_address, exc)
+        return False, str(exc)
+    cfg = current_app.config
+    api_key = cfg.get("RESEND_API_KEY")
+    if not api_key:
+        return False, "Email is not configured (RESEND_API_KEY missing)."
+
+        sender = cfg.get("MAIL_DEFAULT_SENDER")
+    if not sender:
+        return False, "Email is not configured (MAIL_DEFAULT_SENDER missing)."
 
     try:
         resend.api_key = api_key

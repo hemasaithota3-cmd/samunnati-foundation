@@ -57,11 +57,13 @@ class Config:
     }
 
        # ---- Mail ----
-    RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
-    MAIL_DEFAULT_SENDER = os.environ.get(
-        "MAIL_DEFAULT_SENDER",
-        "Samunnathi <onboarding@resend.dev>"
-    )
+        # ---- Mail ----
+    MAIL_SERVER = os.environ.get("MAIL_SERVER", "in-v3.mailjet.com")
+    MAIL_PORT = int(os.environ.get("MAIL_PORT", "587"))
+    MAIL_USE_TLS = _bool(os.environ.get("MAIL_USE_TLS"), default=True)
+    MAIL_USERNAME = os.environ.get("MAIL_USERNAME")       # Mailjet API Key
+    MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")       # Mailjet Secret Key
+    MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER")
     ADMIN_NOTIFY_EMAIL = os.environ.get("ADMIN_NOTIFY_EMAIL")
     # ---- Misc ----
     ITEMS_PER_PAGE = int(os.environ.get("ITEMS_PER_PAGE", "20"))
