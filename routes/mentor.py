@@ -12,12 +12,10 @@ from models import db
 from models.mentor import MentorApplication, AVAILABILITY_OPTIONS
 from services import email_service, notification_service
 from services.dedupe import is_recent_duplicate, mark_submitted
-from services.file_service import validate_and_store_resume
+from services.file_service import validate_and_store_resume, delete_resume
 from services.validators import validate_common_contact_fields, require
 
 from datetime import datetime, timezone
-
-import os
 
 
 mentor_bp = Blueprint("mentor", __name__)
@@ -185,9 +183,6 @@ def mentor_submit():
 
         upload_result = validate_and_store_resume(
             resume_file,
-            upload_folder=current_app.config[
-                "UPLOAD_FOLDER"
-            ],
             max_bytes=current_app.config[
                 "RESUME_MAX_SIZE_BYTES"
             ],
@@ -315,24 +310,26 @@ def mentor_submit():
         )
 
         # =================================================
-        # DELETE UPLOADED FILE IF DATABASE FAILED
+        # DELETE UPLOADED RESUME IF DATABASE FAILED
         # =================================================
+        #
+        # The resume was already uploaded to Supabase Storage before
+        # this point. If the application row couldn't be saved, remove
+        # the now-orphaned file so it doesn't linger in storage.
 
         try:
 
             if (
                 upload_result
-                and upload_result.absolute_path
-                and os.path.exists(
-                    upload_result.absolute_path
-                )
+                and upload_result.ok
+                and upload_result.stored_name
             ):
 
-                os.remove(
-                    upload_result.absolute_path
+                delete_resume(
+                    upload_result.stored_name
                 )
 
-        except OSError as file_error:
+        except Exception as file_error:
 
             current_app.logger.warning(
                 "Could not remove uploaded resume: %s",

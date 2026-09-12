@@ -56,8 +56,9 @@ class Config:
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     }
 
-       # ---- Mail ----
-        # ---- Mail ----
+    # ---- Mail (legacy SMTP settings - kept only because Flask-Mail's
+    # init_app() reads them; no longer used to actually send email,
+    # see services/email_service.py which now uses the Brevo API) ----
     MAIL_SERVER = os.environ.get("MAIL_SERVER", "in-v3.mailjet.com")
     MAIL_PORT = int(os.environ.get("MAIL_PORT", "587"))
     MAIL_USE_TLS = _bool(os.environ.get("MAIL_USE_TLS"), default=True)
@@ -65,6 +66,15 @@ class Config:
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")       # Mailjet Secret Key
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER")
     ADMIN_NOTIFY_EMAIL = os.environ.get("ADMIN_NOTIFY_EMAIL")
+
+    # ---- Brevo (transactional email API - replaces SMTP) ----
+    BREVO_API_KEY = os.environ.get("BREVO_API_KEY")
+
+    # ---- Supabase Storage (persistent resume storage) ----
+    SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+    SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    SUPABASE_RESUME_BUCKET = os.environ.get("SUPABASE_RESUME_BUCKET", "resumes")
+
     # ---- Misc ----
     ITEMS_PER_PAGE = int(os.environ.get("ITEMS_PER_PAGE", "20"))
     NOTIFICATION_POLL_INTERVAL_MS = int(os.environ.get("NOTIFICATION_POLL_INTERVAL_MS", "15000"))

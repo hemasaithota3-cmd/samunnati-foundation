@@ -5,16 +5,22 @@ Secure resume upload handling.
   MIME type for anything except a UX hint.
 - Validates real file content via magic-byte signatures, not just the
   extension.
-- Generates a random, unguessable stored filename - the original filename
-  is kept only as metadata in the database.
-- Files are written outside any publicly-served directory.
+- Generates a random, unguessable stored object key - the original
+  filename is kept only as metadata in the database.
+- The actual file bytes are persisted to Supabase Storage (see
+  storage_service.py), NOT to Render's local disk, since Render's
+  filesystem is ephemeral and wiped on every deploy/restart.
 """
-import os
+import logging
 import re
 import uuid
 from dataclasses import dataclass
 
 from werkzeug.utils import secure_filename
+
+from services import storage_service
+
+logger = logging.getLogger("samunnathi.resume")
 
 # Magic-byte signatures for the three allowed resume formats.
 PDF_SIGNATURE = b"%PDF-"
@@ -26,13 +32,23 @@ DANGEROUS_EXTENSIONS = {
     "jar", "com", "vbs", "ps1", "msi", "dll", "app", "apk",
 }
 
+CONTENT_TYPES = {
+    "pdf": "application/pdf",
+    "doc": "application/msword",
+    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+}
+
 
 @dataclass
 class UploadResult:
     ok: bool
     error: str | None = None
+    # Supabase Storage object key. This is the same value written to both
+    # the `resume_stored_name` and `resume_path` columns (see note in
+    # models/mentor.py / migration notes) - the columns already existed for
+    # the old local-filename scheme and are simply reused to hold the new
+    # storage key, so no schema change is required.
     stored_name: str | None = None
-    absolute_path: str | None = None
     relative_path: str | None = None
 
 
@@ -50,7 +66,7 @@ def _sniff_and_validate_signature(head: bytes, extension: str) -> bool:
     return False
 
 
-def validate_and_store_resume(file_storage, upload_folder: str, max_bytes: int, prefix: str = "mentor") -> UploadResult:
+def validate_and_store_resume(file_storage, max_bytes: int, prefix: str = "mentor") -> UploadResult:
     if file_storage is None or file_storage.filename == "":
         return UploadResult(ok=False, error="Please upload your resume.")
 
@@ -61,7 +77,7 @@ def validate_and_store_resume(file_storage, upload_folder: str, max_bytes: int, 
         return UploadResult(ok=False, error="Please upload a PDF, DOC, or DOCX resume.")
 
     # Size check (stream-based, avoids loading the whole file into memory twice)
-    file_storage.stream.seek(0, os.SEEK_END)
+    file_storage.stream.seek(0, 2)  # SEEK_END
     size = file_storage.stream.tell()
     file_storage.stream.seek(0)
     if size == 0:
@@ -88,38 +104,60 @@ def validate_and_store_resume(file_storage, upload_folder: str, max_bytes: int, 
     }
     if reported_mime and reported_mime not in allowed_mimes[extension]:
         # Not fatal on its own (browsers are inconsistent), the signature
-        # check above is the authoritative guard - but we log the mismatch
-        # via the caller if needed.
+        # check above is the authoritative guard.
         pass
 
-    os.makedirs(upload_folder, exist_ok=True)
     stored_name = f"{prefix}_{uuid.uuid4().hex[:12]}_resume.{extension}"
     # Defense in depth against path traversal even though uuid can't produce it.
     stored_name = re.sub(r"[^A-Za-z0-9_.-]", "", stored_name)
-    absolute_path = os.path.join(upload_folder, stored_name)
 
-    file_storage.save(absolute_path)
+    data = file_storage.stream.read()
+    file_storage.stream.seek(0)
+
+    try:
+        storage_service.upload_bytes(stored_name, data, CONTENT_TYPES[extension])
+    except storage_service.StorageError as exc:
+        logger.error("Resume upload to Supabase Storage failed: %s", exc)
+        return UploadResult(ok=False, error="We couldn't upload your resume right now. Please try again in a moment.")
 
     return UploadResult(
         ok=True,
         stored_name=stored_name,
-        absolute_path=absolute_path,
         relative_path=stored_name,
     )
 
 
-def resume_absolute_path(upload_folder: str, stored_name: str) -> str | None:
+def fetch_resume(stored_name: str) -> tuple[bytes, str] | None:
     """
-    Safely resolve a stored resume filename back to an absolute path,
-    refusing anything that isn't a plain filename inside upload_folder.
+    Download a previously-uploaded resume's bytes + content type from
+    Supabase Storage, for the admin view/download routes.
+
+    Returns None if the file can't be retrieved (missing config, deleted
+    object, network error, etc.) so the caller can 404 cleanly.
     """
-    if not stored_name or "/" in stored_name or "\\" in stored_name or ".." in stored_name:
+    if not stored_name:
         return None
-    candidate = os.path.join(upload_folder, stored_name)
-    upload_folder_real = os.path.realpath(upload_folder)
-    candidate_real = os.path.realpath(candidate)
-    if not candidate_real.startswith(upload_folder_real + os.sep):
+
+    extension = _extension(stored_name)
+    content_type = CONTENT_TYPES.get(extension, "application/octet-stream")
+
+    try:
+        data = storage_service.download_bytes(stored_name)
+    except storage_service.StorageError as exc:
+        logger.error("Resume download from Supabase Storage failed for %s: %s", stored_name, exc)
         return None
-    if not os.path.isfile(candidate_real):
-        return None
-    return candidate_real
+
+    return data, content_type
+
+
+def delete_resume(stored_name: str) -> bool:
+    """
+    Delete a resume from Supabase Storage.
+
+    Used when: (a) the application DB save fails after the resume was
+    already uploaded, and (b) an admin deletes an application. Never
+    raises - a failed cleanup must not break the calling route.
+    """
+    if not stored_name:
+        return True
+    return storage_service.delete_object(stored_name)

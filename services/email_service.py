@@ -5,12 +5,17 @@ Email service for Samunnathi.
 - Sends notification emails to admin.
 - Logs email attempts to email_logs.
 - Email failures NEVER cause application submission to fail.
+
+Sends via the Brevo (formerly Sendinblue) transactional email HTTPS API
+instead of smtplib/SMTP. SMTP connections were timing out / failing on
+Render (WORKER TIMEOUT, 500s on /mentor/submit and /guidance/submit) -
+a plain HTTPS POST avoids that failure mode entirely.
 """
 
 import logging
-import smtplib
+from email.utils import parseaddr
 
-from email.mime.text import MIMEText
+import requests
 from flask import current_app
 
 from models import db
@@ -18,6 +23,9 @@ from models.email_log import EmailLog
 
 
 logger = logging.getLogger("samunnathi.email")
+
+BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+BREVO_REQUEST_TIMEOUT_SECONDS = 10
 
 
 TEMPLATES = {
@@ -75,44 +83,43 @@ TEMPLATES = {
 }
 
 
+def _parsed_sender(raw_sender: str) -> dict:
+    """
+    MAIL_DEFAULT_SENDER is configured as e.g. 'Samunnathi <hello@samunnathi.org>'.
+    Brevo's API wants the sender as a separate {"name": ..., "email": ...} object.
+    """
+    name, email = parseaddr(raw_sender or "")
+    if not email:
+        # No angle-bracket address found - treat the whole string as the address.
+        email = raw_sender or ""
+        name = ""
+    return {"name": name or "Samunnathi", "email": email}
+
+
 def _send_raw(
     to_address: str,
     subject: str,
     body: str
 ) -> tuple[bool, str | None]:
     """
-    Send one email.
+    Send one email via the Brevo transactional email API.
 
     IMPORTANT:
     This function NEVER raises an exception.
-    If SMTP fails, it returns (False, error).
+    If the Brevo API call fails, it returns (False, error).
     """
 
     cfg = current_app.config
 
-    host = cfg.get("MAIL_SERVER")
-    port = cfg.get("MAIL_PORT")
-    use_tls = cfg.get("MAIL_USE_TLS", True)
-
-    username = cfg.get("MAIL_USERNAME")
-    password = cfg.get("MAIL_PASSWORD")
+    api_key = cfg.get("BREVO_API_KEY")
     sender = cfg.get("MAIL_DEFAULT_SENDER")
 
     # ---------------------------------------------------------
     # Check configuration
     # ---------------------------------------------------------
 
-    if not host:
-        return False, "MAIL_SERVER is not configured."
-
-    if not port:
-        return False, "MAIL_PORT is not configured."
-
-    if not username:
-        return False, "MAIL_USERNAME is not configured."
-
-    if not password:
-        return False, "MAIL_PASSWORD is not configured."
+    if not api_key:
+        return False, "BREVO_API_KEY is not configured."
 
     if not sender:
         return False, "MAIL_DEFAULT_SENDER is not configured."
@@ -121,14 +128,21 @@ def _send_raw(
         return False, "Recipient email address is missing."
 
     # ---------------------------------------------------------
-    # Create email
+    # Build request payload
     # ---------------------------------------------------------
 
-    msg = MIMEText(body, "plain", "utf-8")
+    payload = {
+        "sender": _parsed_sender(sender),
+        "to": [{"email": to_address}],
+        "subject": subject,
+        "textContent": body,
+    }
 
-    msg["Subject"] = subject
-    msg["From"] = sender
-    msg["To"] = to_address
+    headers = {
+        "api-key": api_key,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
 
     # ---------------------------------------------------------
     # Send email
@@ -136,42 +150,38 @@ def _send_raw(
 
     try:
         logger.info(
-            "Attempting to send email to %s using %s:%s",
+            "Attempting to send email to %s via Brevo API",
             to_address,
-            host,
-            port,
         )
 
         # IMPORTANT:
-        # Keep timeout short on Render.
-        with smtplib.SMTP(
-            host,
-            int(port),
-            timeout=10
-        ) as server:
-
-            server.ehlo()
-
-            if use_tls:
-                server.starttls()
-                server.ehlo()
-
-            server.login(username, password)
-
-            server.sendmail(
-                sender,
-                [to_address],
-                msg.as_string()
-            )
-
-        logger.info(
-            "Email successfully sent to %s",
-            to_address
+        # Keep timeout short on Render so a Brevo slowdown can never
+        # stall the Gunicorn worker long enough to time out the request.
+        response = requests.post(
+            BREVO_API_URL,
+            json=payload,
+            headers=headers,
+            timeout=BREVO_REQUEST_TIMEOUT_SECONDS,
         )
 
-        return True, None
+        if response.status_code in (200, 201):
+            logger.info(
+                "Email successfully sent to %s",
+                to_address,
+            )
+            return True, None
 
-    except (smtplib.SMTPException, OSError, TimeoutError) as exc:
+        error = f"Brevo API returned {response.status_code}: {response.text[:300]}"
+
+        logger.error(
+            "Email send failed to %s: %s",
+            to_address,
+            error,
+        )
+
+        return False, error
+
+    except requests.RequestException as exc:
 
         error = str(exc)
 

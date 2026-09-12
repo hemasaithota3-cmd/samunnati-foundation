@@ -1,4 +1,4 @@
-import os
+import io
 from datetime import datetime
 
 from flask import (
@@ -14,7 +14,7 @@ from models.volunteer import VolunteerApplication
 from models.notification import Notification
 from services import email_service, notification_service
 from services.export_service import build_csv, build_excel, build_application_pdf
-from services.file_service import resume_absolute_path
+from services.file_service import fetch_resume, delete_resume
 
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -434,38 +434,34 @@ def mentor_resume_view(item_id):
 
     item = MentorApplication.query.get_or_404(item_id)
 
-    upload_folder = current_app.config["UPLOAD_FOLDER"]
-
     current_app.logger.info(
-        "Resume request: mentor_id=%s, stored_name=%s, upload_folder=%s",
+        "Resume request: mentor_id=%s, stored_name=%s",
         item_id,
-        item.resume_stored_name,
-        upload_folder
-    )
-
-    path = resume_absolute_path(
-        upload_folder,
         item.resume_stored_name
     )
 
-    if not path:
+    result = fetch_resume(item.resume_stored_name)
+
+    if not result:
 
         current_app.logger.error(
-            "Resume file NOT FOUND: mentor_id=%s, stored_name=%s, upload_folder=%s",
+            "Resume file NOT FOUND in storage: mentor_id=%s, stored_name=%s",
             item_id,
-            item.resume_stored_name,
-            upload_folder
+            item.resume_stored_name
         )
 
         abort(404)
 
+    data, content_type = result
+
     current_app.logger.info(
-        "Resume file found: %s",
-        path
+        "Resume file found in storage for mentor_id=%s",
+        item_id
     )
 
     return send_file(
-        path,
+        io.BytesIO(data),
+        mimetype=content_type,
         as_attachment=False
     )
 
@@ -476,33 +472,29 @@ def mentor_resume_download(item_id):
 
     item = MentorApplication.query.get_or_404(item_id)
 
-    upload_folder = current_app.config["UPLOAD_FOLDER"]
-
     current_app.logger.info(
-        "Resume download request: mentor_id=%s, stored_name=%s, upload_folder=%s",
+        "Resume download request: mentor_id=%s, stored_name=%s",
         item_id,
-        item.resume_stored_name,
-        upload_folder
-    )
-
-    path = resume_absolute_path(
-        upload_folder,
         item.resume_stored_name
     )
 
-    if not path:
+    result = fetch_resume(item.resume_stored_name)
+
+    if not result:
 
         current_app.logger.error(
-            "Resume download file NOT FOUND: mentor_id=%s, stored_name=%s, upload_folder=%s",
+            "Resume download file NOT FOUND in storage: mentor_id=%s, stored_name=%s",
             item_id,
-            item.resume_stored_name,
-            upload_folder
+            item.resume_stored_name
         )
 
         abort(404)
 
+    data, content_type = result
+
     return send_file(
-        path,
+        io.BytesIO(data),
+        mimetype=content_type,
         as_attachment=True,
         download_name=item.resume_original_name
     )
@@ -526,22 +518,15 @@ def delete_application(app_type, item_id):
 
     if app_type == "mentor":
 
-        path = resume_absolute_path(
-            current_app.config["UPLOAD_FOLDER"],
-            item.resume_stored_name
-        )
+        try:
+            delete_resume(item.resume_stored_name)
 
-        if path and os.path.isfile(path):
+        except Exception:
 
-            try:
-                os.remove(path)
-
-            except OSError:
-
-                current_app.logger.warning(
-                    "Could not remove resume file for mentor #%s",
-                    item_id
-                )
+            current_app.logger.warning(
+                "Could not remove resume from storage for mentor #%s",
+                item_id
+            )
 
     Notification.query.filter_by(
         application_type=app_type,
